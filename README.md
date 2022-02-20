@@ -1,5 +1,5 @@
 # BiLiBiLiSys
-基于SSM和VUE的仿哔哩哔哩视频系统
+基于SSM的仿哔哩哔哩视频系统
 
 演示视频链接：https://live.csdn.net/v/185846
 
