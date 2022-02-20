@@ -1,0 +1,557 @@
+<!-- created at 2018/4/9 by BlueSky @cilicili -->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>视频 - cilicili</title>
+  <link rel="stylesheet" href="css/bootstrap.css">
+  <link rel="stylesheet" href="css/bootstrap-select.css">
+  <script src="js/libs/jquery-3.2.1.js"></script>
+  <script src="js/utils/utils.js"></script>
+  <script src="js/utils/ajaxBase.js"></script>
+  <script src="js/utils/ajaxLogin.js"></script>
+  <script src="js/utils/ajaxVideo.js"></script>
+  <script src="js/utils/ajaxStatus.js"></script>
+  <script src="js/utils/ajaxComment.js"></script>
+  <script src="js/utils/ajaxBarrage.js"></script>
+  <script src="js/libs/barrages.js"></script>
+  <style>
+    .comment {
+      border: none;
+      border-top: 1px #000000 dashed;
+      padding: 20px;
+      font-size: 18px;
+      overflow-wrap: break-word;
+    }
+    
+    .comment .username {
+      font-weight: bold;
+    }
+    
+    .comment .sendtime {
+      font-style: italic;
+    }
+    
+    .comment .like {
+      user-select: none;
+    }
+    
+    .comment .content {
+      font-size: 24px;
+    }
+    
+    #canvasBarrage {
+      position: absolute;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @media screen and (min-width: 1281px) {
+      #canvasBarrage {
+        width: 960px;
+        height: 540px;
+      }
+  
+      #videoBarrage {
+        width: 960px;
+        height: 540px;
+      }
+    }
+
+    @media screen and (max-width: 1280px) {
+      #canvasBarrage {
+        width: 800px;
+        height: 450px;
+      }
+  
+      #videoBarrage {
+        width: 800px;
+        height: 450px;
+      }
+    }
+
+    @media screen and (max-width: 1080px) {
+      #canvasBarrage {
+        width: 640px;
+        height: 360px;
+      }
+  
+      #videoBarrage {
+        width: 640px;
+        height: 360px;
+      }
+    }
+
+    @media screen and (max-width: 720px) {
+      #canvasBarrage {
+        width: 480px;
+        height: 270px;
+      }
+  
+      #videoBarrage {
+        width: 480px;
+        height: 270px;
+      }
+    }
+
+    @media screen and (max-width: 480px) {
+      #canvasBarrage {
+        width: 320px;
+        height: 180px;
+      }
+  
+      #videoBarrage {
+        width: 320px;
+        height: 180px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div id="nav_vue"></div>
+<div id="video_vue" class="container">
+  <template v-if="login">
+    <template v-if="videoFound">
+      <div class="row clearfix">
+        <div class="col-md-12">
+          <h1 class="text-center">{{video.title}}</h1>
+        </div>
+      </div>
+      <div class="row clearfix">
+        <div class="col-md-12 text-center">
+          <hr>
+          <canvas id="canvasBarrage"></canvas>
+          <video id="videoBarrage" :src="STORAGE_SERVER + video.url" controls="controls"></video>
+          <input type="color" style="display: none">
+          <div class="row clearfix">
+            <div class="col-xs-12 col-md-8 col-md-offset-2 text-center">
+              <div class="input-group">
+                <span class="input-group-addon"
+                      :style="'font-weight: bold; background-color: ' + reverseColor + '; color: ' + nowColor">
+                  弹幕颜色
+                </span>
+                <span class="input-group-btn">
+                  <select class="form-control selectpicker" v-model="newBarrage.color" title="弹幕颜色">
+                    <option disabled>弹幕颜色</option>
+                    <option v-for="(c, key) in colors">{{key}}</option>
+                  </select>
+                </span>
+                <input class="form-control" type="text" placeholder="弹幕内容"
+                       @keyup.enter="sendBarrage" v-model="newBarrage.content"
+                       minlength="1" maxlength="250">
+                <span class="input-group-btn">
+                  <select class="form-control selectpicker" v-model="newBarrage.position" title="弹幕位置">
+                    <option disabled>弹幕位置</option>
+                    <option v-for="(c, key) in positions">{{key}}</option>
+                  </select>
+                </span>
+                <span class="input-group-btn">
+                  <button class="btn btn-success" type="button" @click="sendBarrage">发送</button>
+                </span>
+              </div>
+              <p :class="['text-center', 'alert', barrageMsg === '发送成功' ? 'alert-success' : 'alert-danger']"
+                 v-if="barrageMsg.length > 0">
+                {{barrageMsg}}
+              </p>
+            </div>
+          </div>
+          <br>
+        </div>
+      </div>
+      <div class="row clearfix">
+        <div class="col-sm-4 text-right">
+          <button type="button" :class="['btn', 'btn-primary', 'btn-lg', liked ? 'disabled' : '']" @click="like">
+            {{liked ? '(^ω^) 赞过啦！' : '(๑•̀ㅂ•́)و✧ 赞！'}}
+          </button>
+        </div>
+        <div class="col-sm-6">
+          <div class="row clearfix">
+            <div class="col-sm-4">
+              <p>
+                播放量：{{video.countPlay + 1}}
+              </p>
+              <p>
+                点赞量：{{video.countLike}}
+              </p>
+            </div>
+            <div class="col-sm-8">
+              <p>
+                上传时间：{{video.uploadTime.toLocaleString()}}
+              </p>
+              <p>
+                上传用户：{{video.uploadUsername}}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr>
+      <div class="row clearfix">
+        <div class="col-md-8 col-md-offset-2">
+          <div class="row clearfix">
+            <div class="col-md-12">
+              <h2>视频简介</h2>
+              <blockquote>
+                <p style="overflow-wrap: break-word">{{video.description}}</p>
+              </blockquote>
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr>
+      <div class="row clearfix">
+        <div class="col-md-8 col-md-offset-2">
+          <div class="row clearfix">
+            <div class="col-md-12">
+              <h2>评论</h2>
+              <br>
+              <textarea v-model="newComment" class="form-control"
+                        placeholder="评论内容" minlength="1" maxlength="249"
+                        style="height: 100px; font-size: 18px;">
+              </textarea>
+              <p :class="['text-center', 'alert', commentMsg === '发送成功' ? 'alert-success' : 'alert-danger']"
+                 v-if="commentMsg.length > 0">
+                {{commentMsg}}
+              </p>
+              <br>
+              <button class="btn btn-success" @click="sendComment">发送</button>
+              <br>
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr>
+      <div class="row clearfix">
+        <div class="col-md-8 col-md-offset-2">
+          <div class="row clearfix">
+            <div class="col-md-12">
+              <h2>评论区</h2>
+              <br>
+            </div>
+          </div>
+          <template v-if="commentsFound">
+            <div class="row clearfix">
+              <div class="col-md-12">
+                <template v-for="(comment, idx) in comments">
+                  <div class="row clearfix comment">
+                    <div class="col-xs-4 username">
+                      {{comment.sendUsername}}
+                    </div>
+                    <div class="col-xs-4 col-xs-offset-1 sendtime">
+                      {{calcTime(comment.sendtime)}}
+                    </div>
+                    <div class="col-xs-2 col-xs-offset-1 like text-right">
+                      <span @click="likeComment" :id="'comment-' + idx" style="cursor: pointer">
+                        👍 {{comment.countLike}}
+                      </span>
+                      <span :id="'comment-liked-' + idx" style="display: none; cursor: default">
+                        👍 {{comment.countLike}}
+                      </span>
+                    </div>
+                    <br><br>
+                    <div class="col-xs-12 content">
+                      {{comment.content}}
+                    </div>
+                    <div v-if="comment.userId === user.id" class="col-xs-12 text-right">
+                      <br>
+                      <button class="btn btn-danger" @click="deleteComment" :id="'comment-delete-' + idx">删除</button>
+                    </div>
+                  </div>
+                </template>
+                <div class="row clearfix">
+                  <br><br>
+                  <div class="col-md-6 col-md-offset-3 col-xs-10 col-xs-offset-1">
+                    <div class="input-group">
+                      <span class="input-group-btn">
+                        <button :class="['btn', 'btn-success', canBefore ? '' : 'disabled']" @click="before">上一页</button>
+                      </span>
+                      <input v-model="to" class="form-control" type="number" :max="pages" min="1">
+                      <span class="input-group-addon">
+                        / {{pages}}
+                      </span>
+                      <span class="input-group-btn">
+                        <button class="btn btn-info" @click="go">前往</button>
+                      </span>
+                      <span class="input-group-btn">
+                        <button :class="['btn', 'btn-primary', canNext ? '' : 'disabled']" @click="next">下一页</button>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+          <template v-else>
+            <div class="row clearfix">
+              <div class="col-md-12 text-center">
+                <h1 class="text-center">没有更多评论</h1>
+                <br>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </template>
+    <template v-else>
+      <div class="row clearfix">
+        <div class="col-md-12 text-center">
+          <div class="text-center alert alert-danger">没有该视频</div>
+          <br>
+          <button class="btn btn-success" onclick="window.location='index.htm'">返回主页</button>
+        </div>
+      </div>
+    </template>
+  </template>
+  <template v-else>
+    <div class="row clearfix">
+      <div class="col-md-offset-2 col-md-8 text-center">
+        <div class="text-center alert alert-danger">未登录或登录已失效，请登录后查看</div>
+        <br>
+        <button class="btn btn-success" onclick="window.location='index.htm'">返回主页</button>
+        <br>
+      </div>
+    </div>
+  </template>
+</div>
+<div id="footer_vue"></div>
+
+<script src="js/libs/bootstrap.js"></script>
+<script src="js/libs/bootstrap-select.js"></script>
+<script src="js/libs/vue.js"></script>
+
+<script src="js/vue/nav_vue.js"></script>
+<script src="js/vue/footer_vue.js"></script>
+<script>
+  // 播放量更新
+  ajaxVideo.play(VIDEO_INFO.video.id);
+  
+  // 加载评论
+  let hasNextPage = false;
+  let hasPreviousPage = false;
+  let list = [];
+  let pages = 0;
+  
+  const page = ajaxComment.findId({id: VIDEO_INFO.video.id, offset: 1});
+  
+  if (page.page !== undefined) {
+    ({
+      page: {
+        hasNextPage = false // 是否有后一页
+        , hasPreviousPage = false // 是否有前一页
+        , list = {} // 当前页的元素数组
+        , pages = 0 // 总页数
+      }
+    } = page);
+  }
+  
+  const video_vue = new Vue({
+    el: '#video_vue'
+    , data: {
+      STORAGE_SERVER: STORAGE_SERVER + '/'
+      , login: LOGIN_STATUS.status === true
+      , user: LOGIN_STATUS.user
+      , videoFound: VIDEO_INFO.status === "success"
+      , video: VIDEO_INFO.video
+      , liked: false
+      , newBarrage: {
+        color: '白色'
+        , position: '浮动'
+        , content: ''
+      }, colors: {
+        '白色': '#ffffff'
+        , '黑色': '#000000'
+        , '红色': '#ff0000'
+        , '绿色': '#00ff00'
+        , '蓝色': '#0000ff'
+        , '黄色': '#ffff00'
+      }, positions: {
+        '浮动': 2
+        , '固定': 0
+      }, newComment: ''
+      , comments: list
+      , commentsFound: list.length !== 0
+      , offset: 1
+      , canNext: hasNextPage
+      , canBefore: hasPreviousPage
+      , pages
+      , to: 1
+      , barrageMsg: ''
+      , commentMsg: ''
+      , videoBarrage: {}
+    }
+    , methods: {
+      like() {
+        if (!this.liked) {
+          ajaxVideo.like(VIDEO_INFO.video.id);
+          this.video.countLike++;
+          this.liked = true;
+        }
+      }, sendBarrage() {
+        if (this.newBarrage.content.trim().length === 0) {
+          this.barrageMsg = '不能发送空弹幕';
+          return;
+        }
+        this.videoBarrage.add({
+          value: this.newBarrage.content
+          , color: this.nowColor
+          , speed: this.nowPosition
+          , time: Math.ceil($('#videoBarrage')[0].currentTime)
+        });
+        const {status, msg} = ajaxBarrage.add({
+          content: this.newBarrage.content
+          , videoId: this.video.id
+          , color: this.nowColor
+          , offtime: Math.ceil($('#videoBarrage')[0].currentTime)
+          , position: this.nowPosition
+        });
+        if (status === undefined || status === "failure") {
+          this.barrageMsg = msg || '网络连接异常';
+          return;
+        } else {
+          this.barrageMsg = '发送成功';
+          this.newBarrage.content = '';
+        }
+      }, sendComment() {
+        this.commentMsg = '';
+        if (this.newComment.trim().length === 0) {
+          this.commentMsg = '不能发送空评论';
+          return;
+        }
+        const {status, msg} = ajaxComment.add({
+          content: this.newComment
+          , videoId: this.video.id
+        });
+        if (status === undefined || status === "failure") {
+          this.commentMsg = msg || '网络连接异常';
+          return;
+        } else {
+          this.commentMsg = '发送成功';
+          this.newComment = '';
+        }
+        this.offset = 1;
+        const {
+          page: {
+            hasNextPage = false
+            , hasPreviousPage = false
+            , list = {}
+            , pages = 0
+          }
+        } = ajaxComment.findId({id: this.video.id, offset: this.offset});
+        this.comments = list;
+        this.commentsFound = this.comments.length !== 0;
+        this.canNext = hasNextPage;
+        this.canBefore = hasPreviousPage;
+        this.to = this.offset;
+        this.pages = pages;
+      }, likeComment(e) {
+        const idx = e.target.id.replace('comment-', '');
+        const comment = this.comments[idx];
+        ajaxComment.like(comment.id);
+        comment.countLike++;
+        $(`#comment-${idx}`)[0].style.display = 'none';
+        $(`#comment-liked-${idx}`)[0].style.display = 'block';
+      }, deleteComment(e) {
+        const idx = e.target.id.replace('comment-delete-', '');
+        const comment = this.comments[idx];
+        ajaxComment.delete(comment.id);
+        delete this.comments[idx];
+      }, calcTime(localdatetime) {
+        return utils.calcTime(localdatetime.dateTime).toLocaleString();
+      }, next(e) {
+        if (e.target.classList.contains("disabled")) {
+          return;
+        }
+        this.offset++;
+        const {
+          page: {
+            hasNextPage = false
+            , hasPreviousPage = false
+            , list = {}
+            , pages = 0
+          }
+        } = ajaxComment.findId({id: this.video.id, offset: this.offset});
+        this.comments = list;
+        this.commentsFound = this.comments.length !== 0;
+        this.canNext = hasNextPage;
+        this.canBefore = hasPreviousPage;
+        this.to = this.offset;
+        this.pages = pages;
+      }, before(e) {
+        if (e.target.classList.contains("disabled")) {
+          return;
+        }
+        this.offset--;
+        const {
+          page: {
+            hasNextPage = false
+            , hasPreviousPage = false
+            , list = {}
+            , pages = 0
+          }
+        } = ajaxComment.findId({id: this.video.id, offset: this.offset});
+        this.comments = list;
+        this.commentsFound = this.comments.length !== 0;
+        this.canNext = hasNextPage;
+        this.canBefore = hasPreviousPage;
+        this.to = this.offset;
+        this.pages = pages;
+      }, go() {
+        if (this.to < 1 || this.to > this.pages) {
+          this.to = this.offset;
+          return;
+        }
+        this.offset = this.to;
+        const {
+          page: {
+            hasNextPage = false
+            , hasPreviousPage = false
+            , list = {}
+            , pages = 0
+          }
+        } = ajaxComment.findId({id: this.video.id, offset: this.offset});
+        this.comments = list;
+        this.commentsFound = this.comments.length !== 0;
+        this.canNext = hasNextPage;
+        this.canBefore = hasPreviousPage;
+        this.pages = pages;
+      }
+    }, computed: {
+      nowColor() {
+        return this.colors[this.newBarrage.color];
+      }, nowPosition() {
+        return this.positions[this.newBarrage.position];
+      }, reverseColor() {
+        const c = Number.parseInt('0x'.concat(this.nowColor.substr(-6)));
+        const res = Number("0xffffff") - c;
+        return '#' + (Number.isNaN(res) ? "ffffff" : `000000${res.toString(16)}`.substr(-6));
+      }
+    }, mounted() {
+      const {barrages} = ajaxBarrage.findId(this.video.id);
+      const rawBarrages = barrages || [{
+        content: ''
+        , offtime: 0
+        , position: 0
+        , color: '#ffffff'
+      }];
+      const dataBarrages = rawBarrages.map(i => {
+        return {
+          value: i.content
+          , time: i.offtime
+          , speed: i.position
+          , color: i.color
+        }
+      });
+      
+      const eleCanvas = $('#canvasBarrage')[0];
+      const eleVideo = $('#videoBarrage')[0];
+      this.videoBarrage = new CanvasBarrage(eleCanvas, eleVideo, {
+        data: dataBarrages
+      });
+    }
+  });
+
+</script>
+</body>
+</html>

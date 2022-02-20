@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans.xsd
+         http://www.springframework.org/schema/context
+         http://www.springframework.org/schema/context/spring-context.xsd">
+
+  <context:property-placeholder location="classpath:db.properties"/>
+
+  <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+    <property name="driverClassName" value="${db.driverClassName}"/>
+    <property name="url" value="${db.fullURL}"/>
+    <property name="username" value="${db.username}"/>
+    <property name="password" value="${db.password}"/>
+    <property name="testOnBorrow" value="true"/>
+    <property name="testOnReturn" value="true"/>
+    <property name="testWhileIdle" value="true"/>
+    <property name="validationQuery" value="SELECT 1 FROM DUAL"/>
+  </bean>
+
+  <bean class="org.mybatis.spring.SqlSessionFactoryBean">
+    <property name="dataSource" ref="dataSource"/>
+    <property name="mapperLocations" value="classpath:cilicili/jz2/dao/mappers/*.xml"/>
+    <property name="plugins">
+      <array>
+        <bean class="com.github.pagehelper.PageInterceptor">
+          <property name="properties">
+            <value>
+              helperDialect=mysql
+            </value>
+          </property>
+        </bean>
+      </array>
+    </property>
+  </bean>
+
+  <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+    <property name="basePackage" value="cilicili.jz2.dao"/>
+  </bean>
+
+  <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+    <property name="dataSource" ref="dataSource"/>
+  </bean>
+</beans>

@@ -1,0 +1,169 @@
+<!-- created at 2018/4/9 by BlueSky @cilicili -->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>个人设置 - cilicili</title>
+  <link rel="stylesheet" href="css/bootstrap.css">
+  <script src="js/libs/jquery-3.2.1.js"></script>
+  <script src="js/utils/utils.js"></script>
+  <script src="js/utils/ajaxBase.js"></script>
+  <script src="js/utils/ajaxLogin.js"></script>
+  <script src="js/utils/ajaxVideo.js"></script>
+  <script src="js/utils/ajaxStatus.js"></script>
+  <script src="js/utils/ajaxUser.js"></script>
+  <script>
+  </script>
+  <style>
+    [v-cloak] {
+      display: none
+    }
+  </style>
+</head>
+<body>
+<div id="nav_vue"></div>
+<div class="container">
+  <div class="row clearfix">
+    <div class="col-md-12">
+      <h1 class="text-center">个人设置</h1>
+      <br>
+    </div>
+  </div>
+</div>
+<div id="panel_vue" class="container">
+  <template v-if="login">
+    <div class="row clearfix">
+      <div class="col-md-3"></div>
+      <div class="col-md-6">
+        <form class="form-horizontal" role="form">
+          <div class="form-group">
+            <label class="col-sm-3 control-label">用户名</label>
+            <div class="col-sm-6">
+              <input v-model="username" type="text" class="form-control disabled"
+                     @keyup.enter="save" minlength="1" maxlength="20"/>
+              <div v-if="tipName" v-cloak class="text-center alert alert-warning">请输入用户名</div>
+            </div>
+            <div class="col-sm-3"></div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-3 control-label" minlength="1">密码</label>
+            <div class="col-sm-6">
+              <input v-model="password" type="password" class="form-control"
+                     @keyup.enter="save" minlength="1" maxlength="20"/>
+              <div v-if="tipPass" v-cloak class="text-center alert alert-warning">请输入密码</div>
+            </div>
+            <div class="col-sm-3"></div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-3 control-label" minlength="1">确认密码</label>
+            <div class="col-sm-6">
+              <input v-model="password2" type="password" class="form-control"
+                     @keyup.enter="save" minlength="1" maxlength="20"/>
+              <div v-if="tipPass2" v-cloak class="text-center alert alert-warning">请再次输入密码</div>
+            </div>
+            <div class="col-sm-3"></div>
+          </div>
+          <div class="form-group">
+            <div class="col-sm-3"></div>
+            <div class="col-sm-6">
+              <div v-if="tipFailure" v-cloak class="text-center alert alert-danger">{{msg}}</div>
+              <div v-if="tipSuccess" v-cloak class="text-center alert alert-success">{{msg}}</div>
+            </div>
+            <div class="col-sm-3"></div>
+          </div>
+          <div class="form-group">
+            <div class="col-sm-offset-5 col-sm-7">
+              <button v-if="!tipSuccess" type="button" class="btn btn-primary" @click="save">保存</button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="col-md-3"></div>
+    </div>
+  </template>
+  <template v-else>
+    <div class="row clearfix">
+      <div class="col-md-offset-2 col-md-8 text-center">
+        <div class="text-center alert alert-danger">未登录或登录已失效，请登录后查看</div>
+        <br>
+        <button class="btn btn-success" onclick="window.location='index.htm'">返回主页</button>
+        <br>
+      </div>
+    </div>
+  </template>
+</div>
+<div id="footer_vue"></div>
+
+<script src="js/libs/bootstrap.js"></script>
+<script src="js/libs/vue.js"></script>
+
+<script src="js/vue/nav_vue.js"></script>
+<script src="js/vue/footer_vue.js"></script>
+<script>
+  const panel_vue = new Vue({
+    el: '#panel_vue',
+    data: {
+      login: LOGIN_STATUS.status === true
+      , tipName: false
+      , tipPass: false
+      , tipPass2: false
+      , tipFailure: false
+      , tipSuccess: false
+      , username: LOGIN_STATUS.status ? LOGIN_STATUS.user.username : ''
+      , password: ''
+      , password2: ''
+      , msg: ''
+    }, methods: {
+      save: function () {
+        this.tipName = this.username.trim().length === 0;
+        this.tipPass = this.password.trim().length === 0;
+        this.tipPass2 = this.password2.trim().length === 0;
+        if (this.tipName || this.tipPass || this.tipPass2) {
+          this.tipFailure = false;
+          return;
+        } else if (this.password !== this.password2) {
+          this.tipFailure = true;
+          this.msg = '两次密码不一致';
+          return;
+        }
+        this.tipFailure = false;
+        this.msg = '';
+        let {status, msg, token} = ajaxLogin.apply("modify_user_settings");
+        if (status === undefined || status === "failure") {
+          this.msg = msg || '网络连接异常';
+          this.tipFailure = true;
+        } else if (status === "success") {
+          utils.setCookie("apply", token);
+        }
+        ({status, msg} = ajaxUser.update({
+          username: this.username,
+          password: this.password
+        }));
+        if (status === undefined || status === "failure") {
+          this.tipFailure = true;
+          this.msg = msg || '网络连接异常';
+        } else if (status === "success") {
+          let token = '';
+          ({status, msg, token} = ajaxLogin.login({
+            username: this.username,
+            password: this.password
+          }));
+          if (status === undefined || status === "failure") {
+            this.tipFailure = true;
+            this.msg = msg || '网络连接异常';
+          } else if (status === "success") {
+            this.tipFailure = false;
+            this.tipSuccess = true;
+            this.msg = '保存成功';
+            utils.setCookie("token", token);
+            setTimeout(()=>{window.location.reload()}, 3000);
+          }
+        }
+      }
+    }
+  })
+</script>
+</body>
+</html>

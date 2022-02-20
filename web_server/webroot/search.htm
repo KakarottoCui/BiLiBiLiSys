@@ -1,0 +1,216 @@
+<!-- created at 2018/4/10 by BlueSky @cilicili -->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>搜索 - cilicili</title>
+  <link rel="stylesheet" href="css/bootstrap.css">
+  <script src="js/libs/jquery-3.2.1.js"></script>
+  <script src="js/utils/utils.js"></script>
+  <script src="js/utils/ajaxBase.js"></script>
+  <script src="js/utils/ajaxLogin.js"></script>
+  <script src="js/utils/ajaxVideo.js"></script>
+  <script src="js/utils/ajaxStatus.js"></script>
+  <style>
+    .video-box {
+      cursor: pointer;
+      padding: 5px;
+    }
+    
+    .video-box .info {
+      text-shadow: 0 0 1px #aeaeae;
+    }
+    
+    .video-box .info:hover {
+      text-shadow: 0 0 1px #000000;
+    }
+    
+    .video-box img {
+      border-radius: 5px;
+    }
+    
+    .video-box img:hover {
+      box-shadow: #5e5e5e 1px 1px 5px;
+    }
+  </style>
+</head>
+<body>
+<div id="nav_vue"></div>
+<div id="search_vue" class="container">
+  <div class="row clearfix">
+    <div class="col-md-12">
+      <h4>关键词：</h4>
+      <blockquote>
+        {{q}}
+      </blockquote>
+      <h4>搜索结果：{{total}} 条</h4>
+      <br>
+    </div>
+  </div>
+  <template v-if="videosFound">
+    <div class="row clearfix">
+      <div class="col-md-12">
+        <template v-for="video in videos">
+          <div :class="['video-box', 'col-md-3', 'col-sm-4', 'col-xs-12', 'text-center']"
+               :onclick="`window.location.href='video.htm?id=${video.id}'`">
+            <div class="row clearfix">
+              <div class="col-md-12 col-sm-12 col-xs-6">
+                <img :src="STORAGE_SERVER + video.picUrl" width="210" height="140">
+              </div>
+              <div class="info col-md-12 col-sm-12 col-xs-6">
+                <h4>
+                  {{`${video.title.substr(0, 10)}${video.title.length > 10 ? ' ...' : ''}`}}
+                </h4>
+                <p>
+                  👍 {{video.countLike}}&nbsp;&nbsp;📺 {{video.countPlay}}
+                </p>
+                <p>
+                  {{`${video.uploadUsername.substr(0, 10)}${video.uploadUsername.length > 10 ? ' ...' : ''}`}}
+                </p>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+    <div class="row clearfix">
+      <br><br>
+      <div class="col-xs-2 col-sm-offset-2 text-right">
+        <button :class="['btn', 'btn-success', canBefore ? '' : 'disabled']" @click="before">上一页</button>
+      </div>
+      <div class="col-xs-6 col-xs-offset-1
+                  col-sm-3 col-sm-offset-0
+                  col-md-3 col-md-offset-1
+                  col-lg-2">
+        <div class="input-group">
+          <input v-model="to" class="form-control" type="number" :max="pages" min="1">
+          <span class="input-group-addon">
+            / {{pages}}
+          </span>
+          <span class="input-group-btn">
+            <button class="btn btn-info" @click="go">前往</button>
+          </span>
+        </div>
+      </div>
+      <div class="col-xs-2 col-xs-offset-1">
+        <button :class="['btn', 'btn-primary', canNext ? '' : 'disabled']" @click="next">下一页</button>
+      </div>
+    </div>
+  </template>
+  <template v-else>
+    <div class="row clearfix">
+      <div class="col-md-12 text-center">
+        <h1 class="text-center">没有找到相关视频</h1>
+        <br>
+      </div>
+    </div>
+  </template>
+</div>
+<div id="footer_vue"></div>
+
+<script src="js/libs/bootstrap.js"></script>
+<script src="js/libs/vue.js"></script>
+
+<script src="js/vue/nav_vue.js"></script>
+<script src="js/vue/footer_vue.js"></script>
+
+<script>
+  let hasNextPage = false;
+  let hasPreviousPage = false;
+  let list = [];
+  let pages = 0;
+  let total = 0;
+  
+  const page = ajaxVideo.find(1, utils.getRequest("q") || '');
+  
+  if (page.page !== undefined) {
+    ({
+      page: {
+        hasNextPage = false // 是否有后一页
+        , hasPreviousPage = false // 是否有前一页
+        , list = {} // 当前页的元素数组
+        , pages = 0 // 总页数
+        , total = 0 // 总个数
+      }
+    } = page);
+  }
+  
+  const search_vue = new Vue({
+    el: '#search_vue'
+    , data: {
+      STORAGE_SERVER: STORAGE_SERVER + '/'
+      , videos: list
+      , videosFound: list.length !== 0
+      , offset: 1
+      , canNext: hasNextPage
+      , canBefore: hasPreviousPage
+      , pages
+      , total
+      , to: 1
+      , q: utils.getRequest('q')
+    }, methods: {
+      next(e) {
+        if (e.target.classList.contains("disabled")) {
+          return;
+        }
+        this.offset++;
+        const {
+          page: {
+            hasNextPage = false
+            , hasPreviousPage = false
+            , list = {}
+            , pages = 0
+          }
+        } = ajaxVideo.find(this.offset, utils.getRequest("q"));
+        this.videos = list;
+        this.videosFound = this.videos.length !== 0;
+        this.canNext = hasNextPage;
+        this.canBefore = hasPreviousPage;
+        this.to = this.offset;
+        this.pages = pages;
+      }, before(e) {
+        if (e.target.classList.contains("disabled")) {
+          return;
+        }
+        this.offset--;
+        const {
+          page: {
+            hasNextPage = false
+            , hasPreviousPage = false
+            , list = {}
+            , pages = 0
+          }
+        } = ajaxVideo.find(this.offset, utils.getRequest("q"));
+        this.videos = list;
+        this.videosFound = this.videos.length !== 0;
+        this.canNext = hasNextPage;
+        this.canBefore = hasPreviousPage;
+        this.to = this.offset;
+        this.pages = pages;
+      }, go() {
+        if (this.to < 1 || this.to > this.pages) {
+          this.to = this.offset;
+          return;
+        }
+        this.offset = this.to;
+        const {
+          page: {
+            hasNextPage = false
+            , hasPreviousPage = false
+            , list = {}
+            , pages = 0
+          }
+        } = ajaxVideo.find(this.offset, utils.getRequest("q"));
+        this.videos = list;
+        this.videosFound = this.videos.length !== 0;
+        this.canNext = hasNextPage;
+        this.canBefore = hasPreviousPage;
+        this.pages = pages;
+      }
+    }
+  });
+</script>
+</body>
+</html>

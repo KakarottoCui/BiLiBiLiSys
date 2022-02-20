@@ -1,0 +1,42 @@
+<!-- created at 2018/4/10 by BlueSky @cilicili -->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>退出 - cilicili</title>
+  <link rel="stylesheet" href="css/bootstrap.css">
+  <script src="js/libs/jquery-3.2.1.js"></script>
+  <script src="js/utils/utils.js"></script>
+  <script src="js/utils/ajaxBase.js"></script>
+  <script src="js/utils/ajaxLogin.js"></script>
+  <script src="js/utils/ajaxVideo.js"></script>
+  <script src="js/utils/ajaxStatus.js"></script>
+</head>
+<body>
+<div id="nav_vue"></div>
+<div id="panel_vue" class="container">
+    <div class="row clearfix">
+      <div class="col-md-12 text-center">
+        <h1>您已退出</h1>
+        <br>
+        <button class="btn btn-success" onclick="window.location='index.htm'">返回主页</button>
+      </div>
+    </div>
+</div>
+<div id="footer_vue"></div>
+
+<script src="js/libs/bootstrap.js"></script>
+<script src="js/libs/vue.js"></script>
+
+<script>
+  if (LOGIN_STATUS.status === true) {
+    ajaxLogin.logout();
+    UPDATE_LOGIN_STATUS();
+  }
+</script>
+<script src="js/vue/nav_vue.js"></script>
+<script src="js/vue/footer_vue.js"></script>
+</body>
+</html>

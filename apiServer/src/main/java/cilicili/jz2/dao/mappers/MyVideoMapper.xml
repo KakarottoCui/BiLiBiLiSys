@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cilicili.jz2.dao.MyVideoMapper">
+  <resultMap id="BaseResultMap" type="cilicili.jz2.pojo.VideoWithUploadUsername">
+    <id column="id" property="id"/>
+    <result column="title" property="title"/>
+    <result column="url" property="url"/>
+    <result column="upload_time" property="uploadTime"/>
+    <result column="count_play" property="countPlay"/>
+    <result column="count_like" property="countLike"/>
+    <result column="pic_url" property="picUrl"/>
+    <result column="description" property="description"/>
+    <result column="upload_username" property="uploadUsername"/>
+  </resultMap>
+
+  <select id="findById" resultMap="BaseResultMap">
+    SELECT *
+    FROM videos AS a
+      JOIN
+      (SELECT
+         username 'upload_username',
+         id       'user_id'
+       FROM users) AS b
+        ON a.upload_userid = b.user_id
+    WHERE a.id = #{id}
+  </select>
+
+  <select id="findByUrl" resultMap="BaseResultMap">
+    SELECT *
+    FROM videos AS a
+      JOIN
+      (SELECT
+         username 'upload_username',
+         id       'user_id'
+       FROM users) AS b
+        ON a.upload_userid = b.user_id
+    WHERE a.url = #{url}
+  </select>
+
+  <select id="findAllVideos" resultMap="BaseResultMap">
+    SELECT *
+    FROM videos AS a
+      JOIN
+      (SELECT
+         username 'upload_username',
+         id       'user_id'
+       FROM users) AS b
+        ON a.upload_userid = b.user_id
+    ORDER BY a.id DESC
+  </select>
+
+  <select id="queryVideo" resultMap="BaseResultMap">
+    SELECT *
+    FROM videos AS a
+      JOIN
+      (SELECT
+         username 'upload_username',
+         id       'user_id'
+       FROM users) AS b
+        ON a.upload_userid = b.user_id
+    WHERE a.title LIKE #{keyword}
+          OR a.description LIKE #{keyword}
+          OR b.upload_username LIKE #{keyword}
+    ORDER BY a.id DESC
+  </select>
+</mapper>

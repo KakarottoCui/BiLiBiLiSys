@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cilicili.jz2.dao.BarrageMapper">
+  <resultMap id="BaseResultMap" type="cilicili.jz2.pojo.Barrage">
+    <constructor>
+      <idArg column="id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="user_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="video_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="sendtime" javaType="java.time.ZonedDateTime" jdbcType="TIMESTAMP" />
+      <arg column="content" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="color" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="offtime" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="position" javaType="java.lang.Byte" jdbcType="TINYINT" />
+    </constructor>
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, user_id, video_id, sendtime, content, color, offtime, position
+  </sql>
+  <select id="selectByExample" parameterType="cilicili.jz2.pojo.BarrageExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    'true' as QUERYID,
+    <include refid="Base_Column_List" />
+    from barrages
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 'true' as QUERYID,
+    <include refid="Base_Column_List" />
+    from barrages
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from barrages
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="cilicili.jz2.pojo.BarrageExample">
+    delete from barrages
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="cilicili.jz2.pojo.Barrage">
+    insert into barrages (id, user_id, video_id, 
+      sendtime, content, color, 
+      offtime, position)
+    values (#{id,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, #{videoId,jdbcType=INTEGER}, 
+      #{sendtime,jdbcType=TIMESTAMP}, #{content,jdbcType=VARCHAR}, #{color,jdbcType=VARCHAR}, 
+      #{offtime,jdbcType=INTEGER}, #{position,jdbcType=TINYINT})
+  </insert>
+  <insert id="insertSelective" parameterType="cilicili.jz2.pojo.Barrage">
+    insert into barrages
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="userId != null">
+        user_id,
+      </if>
+      <if test="videoId != null">
+        video_id,
+      </if>
+      <if test="sendtime != null">
+        sendtime,
+      </if>
+      <if test="content != null">
+        content,
+      </if>
+      <if test="color != null">
+        color,
+      </if>
+      <if test="offtime != null">
+        offtime,
+      </if>
+      <if test="position != null">
+        position,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null">
+        #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="videoId != null">
+        #{videoId,jdbcType=INTEGER},
+      </if>
+      <if test="sendtime != null">
+        #{sendtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="content != null">
+        #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="color != null">
+        #{color,jdbcType=VARCHAR},
+      </if>
+      <if test="offtime != null">
+        #{offtime,jdbcType=INTEGER},
+      </if>
+      <if test="position != null">
+        #{position,jdbcType=TINYINT},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="cilicili.jz2.pojo.BarrageExample" resultType="java.lang.Long">
+    select count(*) from barrages
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update barrages
+    <set>
+      <if test="record.id != null">
+        id = #{record.id,jdbcType=INTEGER},
+      </if>
+      <if test="record.userId != null">
+        user_id = #{record.userId,jdbcType=INTEGER},
+      </if>
+      <if test="record.videoId != null">
+        video_id = #{record.videoId,jdbcType=INTEGER},
+      </if>
+      <if test="record.sendtime != null">
+        sendtime = #{record.sendtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.content != null">
+        content = #{record.content,jdbcType=VARCHAR},
+      </if>
+      <if test="record.color != null">
+        color = #{record.color,jdbcType=VARCHAR},
+      </if>
+      <if test="record.offtime != null">
+        offtime = #{record.offtime,jdbcType=INTEGER},
+      </if>
+      <if test="record.position != null">
+        position = #{record.position,jdbcType=TINYINT},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update barrages
+    set id = #{record.id,jdbcType=INTEGER},
+      user_id = #{record.userId,jdbcType=INTEGER},
+      video_id = #{record.videoId,jdbcType=INTEGER},
+      sendtime = #{record.sendtime,jdbcType=TIMESTAMP},
+      content = #{record.content,jdbcType=VARCHAR},
+      color = #{record.color,jdbcType=VARCHAR},
+      offtime = #{record.offtime,jdbcType=INTEGER},
+      position = #{record.position,jdbcType=TINYINT}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="cilicili.jz2.pojo.Barrage">
+    update barrages
+    <set>
+      <if test="userId != null">
+        user_id = #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="videoId != null">
+        video_id = #{videoId,jdbcType=INTEGER},
+      </if>
+      <if test="sendtime != null">
+        sendtime = #{sendtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="content != null">
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="color != null">
+        color = #{color,jdbcType=VARCHAR},
+      </if>
+      <if test="offtime != null">
+        offtime = #{offtime,jdbcType=INTEGER},
+      </if>
+      <if test="position != null">
+        position = #{position,jdbcType=TINYINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cilicili.jz2.pojo.Barrage">
+    update barrages
+    set user_id = #{userId,jdbcType=INTEGER},
+      video_id = #{videoId,jdbcType=INTEGER},
+      sendtime = #{sendtime,jdbcType=TIMESTAMP},
+      content = #{content,jdbcType=VARCHAR},
+      color = #{color,jdbcType=VARCHAR},
+      offtime = #{offtime,jdbcType=INTEGER},
+      position = #{position,jdbcType=TINYINT}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
