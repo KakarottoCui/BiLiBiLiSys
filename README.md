@@ -1,19 +1,15 @@
 # BiLiBiLiSys
 基于SSM的仿哔哩哔哩视频系统
 
-演示视频链接：https://live.csdn.net/v/185846
-
-升级后的演示视频：https://live.csdn.net/v/195919
-
-再次升级后的演示视频：https://live.csdn.net/v/204124
+演示视频链接：https://www.bilibili.com/video/BV1L841137Mn
 
 1. 介绍
 
 是一个支持用户上传视频、观看视频、搜索视频、发送评论、发送弹幕的视频分享网站。
 
-新增后台管理界面和管理员角色，可以对视频、弹幕、评论等进行管理。
+拥有后台管理和管理员角色，可以对用户、视频、弹幕、评论、视频标签等进行管理。
 
-新增用户可以管理自己的视频、弹幕和评论
+普通用户可以管理自己的视频、弹幕和评论。
 
 2. 架构
 
@@ -30,18 +26,18 @@
 2.4 文件存储获取服务 - storage_server
 
 用于获取上传的文件。
+
 3. 环境
 3.1 后台
 
-MySQL: 5.7.18-log - Source distribution
+MySQL: 5.7
 
-JDK: OpenJDK 64-Bit Server VM (build 25.161-b14, mixed mode)
+JDK: jdk1.8
 
-Maven: Apache Maven 3.0.5 (Red Hat 3.0.5-17)
+Maven: Apache Maven 3或以上
 
-Node: v6.14.0
+Node: v6.14.0或以上
 
-OS: centos-release-7-4.1708.el7.centos.x86_64
 3.2 前端
 
 Vue.js: v2.5.13
@@ -53,10 +49,5 @@ Bootstrap: v3.3.7
 Bootstrap-select: v1.12.4
 
 ECMAScript: ECMAScript 6
-
-Browser: Chrome, 66.0.3359.139（正式版本） （64 位）
-
-OS: Windows 10, 1803 (内部版本 17134.1)
-
 
 详询 微信1：egvh56ufy7hh ，微信2：A15192572135 ，钉钉：chengxuyuandabo ，QQ：821898835 ，承接商业项目和毕设
